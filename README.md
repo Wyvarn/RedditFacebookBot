@@ -17,8 +17,8 @@ You will need a couple of things for setting up
 
 2. Heroku Account
     
-   This will be used to deploy the application. A handy tool to have is the []heroku CLI]() 
-    
+   This will be used to deploy the application. A handy tool to have is the [heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) 
+
 ### Setup
 
 Setting up is really simple and requires a simple cloning of the repo and installing dependencies

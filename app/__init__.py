@@ -5,7 +5,9 @@ This defines the application module that essentially creates a new flask app obj
 import jinja2
 from config import config, Config
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 
 class RedditBotApp(Flask):
     """
@@ -51,6 +53,8 @@ def create_app(config_name):
     :rtype: Flask
     """
     app = RedditBotApp()
+
+    db.init_app(app)
 
     # configure the application with the given configuration name, testing, development,
     # production

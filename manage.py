@@ -2,13 +2,25 @@ import os
 import better_exceptions
 from flask_script import Manager, Shell, Server
 from setup_environment import setup_environment_variables
-from app import create_app
+from app import create_app, db
+from flask_migrate import MigrateCommand, Migrate, upgrade
+import alembic
+import alembic.config
 
 # import environment variables
 setup_environment_variables()
 
 # create the application with given configuration from environment
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
+# import models with app context
+# this prevents the data from the db from being deleted on every migration
+
+with app.app_context():
+    from app.models import *
+
+manager = Manager(app)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 
 def make_shell_context():
@@ -80,6 +92,26 @@ def profile(length=25, profile_dir=None):
     app.config["PROFILE"] = True
     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length], profile_dir=profile_dir)
     app.run()
+
+
+@manager.option('-m', '--migration', help='create database from migrations',
+                action='store_true', default=None)
+def init_db(migration):
+    """drop all databases, instantiate schemas"""
+    db.drop_all()
+
+    if migration:
+        # create database using migrations
+        print("applying migrations")
+        upgrade()
+    else:
+        # create database from model schema directly
+        db.create_all()
+        db.session.commit()
+        cfg = alembic.config.Config("app/migrations/alembic.ini")
+        alembic.command.stamp(cfg, "head")
+        # todo: add default roles
+        # Role.add_default_roles()
 
 
 if __name__ == "__main__":
