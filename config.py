@@ -29,6 +29,16 @@ class Config(object):
     SSL_DISABLE = False
     SECRET_KEY = os.environ.get('SECRET_KEY', 'reddisbot')
 
+    # DATABASE CONFIGS
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    POSTGRES_USER = os.environ.get("POSTGRES_USER")
+    POSTGRES_DB = os.environ.get("POSTGRES_DB")
+    POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+    DATABASE_CONNECT_OPTIONS = {}
+
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT", 'reddit_salt')
 
     # task configurations
@@ -43,6 +53,18 @@ class Config(object):
     CSRF_SESSION_KEY = os.environ.get("CSRF_SESSION_KEY")
     THREADS_PER_PAGE = 2
 
+    # mail settings
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 465
+    MAIL_USE_TLS = True
+
+    # gmail authentication
+    MAIL_SUBJECT_PREFIX = '[Arco]'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_SENDER = 'Arco Admin <arcoadmin@arco.com>'
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
+
     @staticmethod
     def init_app(app):
         """Initializes the current application"""
@@ -53,6 +75,7 @@ class DevelopmentConfig(Config):
     """Configuration for development environment"""
 
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 
 class TestingConfig(Config):
@@ -72,14 +95,33 @@ class ProductionConfig(Config):
     """
     Production configuration
     """
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    ADMINS = [os.environ.get("ADMIN_EMAIL_1")]
 
     @classmethod
     def init_app(cls, app):
         Config.init_app(app)
+        # email errors to the administrators
+        import logging
+        from logging.handlers import SMTPHandler
+        credentials = None
+        secure = None
+        if getattr(cls, 'MAIL_USERNAME', None) is not None:
+            credentials = (cls.MAIL_USERNAME, cls.MAIL_PASSWORD)
+            if getattr(cls, 'MAIL_USE_TLS', None):
+                secure = ()
+        mail_handler = SMTPHandler(
+            mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
+            fromaddr=cls.MAIL_SENDER,
+            toaddrs=[cls.ADMINS],
+            subject=cls.MAIL_SUBJECT_PREFIX + ' Application Error',
+            credentials=credentials,
+            secure=secure)
+        mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(mail_handler)
 
 
 class HerokuConfig(ProductionConfig):
-
     @classmethod
     def init_app(cls, app):
         ProductionConfig.init_app(app)

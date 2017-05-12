@@ -96,8 +96,8 @@ def error_handlers(app):
     def not_found(error):
         """
         This will handle errors that involve 404 messages
-        :return: a template instructing user they have sent a request that does not exist on the
-         server
+        :return: a template instructing user they have sent a request that does not exist on 
+        the server
         """
 
 
