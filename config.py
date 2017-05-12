@@ -23,11 +23,11 @@ class Config(object):
     :cvar SQLALCHEMY_DATABASE_URI Define the database - we are working with SQLite for
      this example    
     """
-
     __abstract__ = True
     __metaclass__ = ABCMeta
     SSL_DISABLE = False
     SECRET_KEY = os.environ.get('SECRET_KEY', 'reddisbot')
+    USER_AGENT = os.environ.get("USER_AGENT", "my user agent")
 
     # DATABASE CONFIGS
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
@@ -68,6 +68,29 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SENDER = 'Arco Admin <arcoadmin@arco.com>'
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
+
+    QUICK_REPLIES_LIST = [
+        {
+            "content_type": "text",
+            "title": "Meme",
+            "payload": "meme",
+        },
+        {
+            "content_type": "text",
+            "title": "Motivation",
+            "payload": "motivation",
+        },
+        {
+            "content_type": "text",
+            "title": "Shower Thought",
+            "payload": "Shower_Thought",
+        },
+        {
+            "content_type": "text",
+            "title": "Jokes",
+            "payload": "Jokes",
+        }
+    ]
 
     @staticmethod
     def init_app(app):

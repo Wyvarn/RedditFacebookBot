@@ -1,33 +1,52 @@
 from . import home
-from flask import request
+from flask import request, current_app
 import json
 import requests
 import click
+from app import db
+from config import Config
+from app.models import Users, Posts
+import os
+import praw
 
-# This needs to be filled with the Page Access Token that will be provided
-# by the Facebook App that will be created.
-PAT = ''
+reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
+                     client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
 
 
+# TODO: move to auth module
 @home.route('', methods=['GET'])
 def handle_verification():
+    """
+    Handles verification of this request
+    :return: request from Facebook if valid, Error message
+    """
     click.echo(click.style("Handling Verification.", fg="green", bold=True, bg="black"))
-    if request.args.get('hub.verify_token', '') == 'my_voice_is_my_password_verify_me':
+    facebook_webhook_token = current_app.config.get("FACEBOOK_WEBHOOK_VERIFY_TOKEN")
+    if request.args.get('hub.verify_token', '') == facebook_webhook_token:
         click.echo(click.style("Verification successful!", fg="green", bold=True, bg="black"))
         return request.args.get('hub.challenge', '')
     else:
-        click.echo(click.style("Verification failed!", fg="green", bold=True, bg="black"))
+        click.echo(click.style("Verification failed!", fg="red", bold=True, bg="black"))
         return 'Error, wrong validation token'
 
 
 @home.route('', methods=['POST'])
 def handle_messages():
+    # retrieve PAGE ACCESS TOKEN from facebook
+    page_access_token = current_app.config.get("FACEBOOK_PAGE_ACCESS_TOKEN")
+
     click.echo(click.style("Handling Messages", fg="green", bold=True, bg="black"))
+
+    # get the payload
     payload = request.get_data()
+
     click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True, bg="black"))
+
+    # for each sender and message
     for sender, message in messaging_events(payload):
         click.echo(click.style("Incoming from %s: %s" % (sender, message), fg="green", bold=True, bg="black"))
-        send_message(PAT, sender, message)
+        # send them a message
+        send_message(page_access_token, sender, message)
     return "ok"
 
 
@@ -36,8 +55,8 @@ def messaging_events(payload):
     provided payload.
     """
     data = json.loads(payload)
-    messaging_events = data["entry"][0]["messaging"]
-    for event in messaging_events:
+    message_events = data["entry"][0]["messaging"]
+    for event in message_events:
         if "message" in event and "text" in event["message"]:
             yield event["sender"]["id"], event["message"]["text"].encode('unicode_escape')
         else:
@@ -45,16 +64,130 @@ def messaging_events(payload):
 
 
 def send_message(token, recipient, text):
-    """Send the message text to recipient with id recipient.
     """
+    Send the message text to recipient with id recipient.
+    """
+    quick_replies_list = Config.QUICK_REPLIES_LIST
 
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                      params={"access_token": token},
-                      data=json.dumps({
-                          "recipient": {"id": recipient},
-                          "message": {"text": text.decode('unicode_escape')}
-                      }),
-                      headers={'Content-type': 'application/json'})
+    if "meme" in text.lower():
+        subreddit_name = "memes"
+    elif "shower" in text.lower():
+        subreddit_name = "Showerthoughts"
+    elif "joke" in text.lower():
+        subreddit_name = "Jokes"
+    else:
+        subreddit_name = "GetMotivated"
+
+    user = get_or_create(db.session, Users, name=recipient)
+
+    if subreddit_name == "Showerthoughts":
+        for submission in reddit.subreddit(subreddit_name).hot(limit=None):
+            if submission.is_self:
+                query_result = Posts.query.filter(Posts.name == submission.id).first()
+
+                if query_result is None:
+                    post = Posts(submission.id, submission.title)
+                    user.posts.append(post)
+                    db.session.commit()
+                    payload = submission.title
+                    break
+
+                elif user not in query_result.users:
+                    user.posts.append(query_result)
+                    db.session.commit()
+                    payload = submission.title
+                    break
+                else:
+                    continue
+
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": token},
+                          data=json.dumps({
+                              "recipient": {"id": recipient},
+                              "message": {"text": payload,
+                                          "quick_replies": quick_replies_list}
+                          }),
+                          headers={'Content-type': 'application/json'})
+    elif subreddit_name == "Jokes":
+        for submission in reddit.subreddit(subreddit_name).hot(limit=None):
+            if (submission.is_self == True) and (submission.link_flair_text is None):
+                query_result = Posts.query.filter(Posts.name == submission.id).first()
+                if query_result is None:
+                    post = Posts(submission.id, submission.title)
+                    user.posts.append(post)
+                    db.session.commit()
+                    payload = submission.title
+                    payload_text = submission.selftext
+                    break
+                elif user not in query_result.users:
+                    user.posts.append(query_result)
+                    db.session.commit()
+                    payload = submission.title
+                    payload_text = submission.selftext
+                    break
+                else:
+                    continue
+
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": token},
+                          data=json.dumps({
+                              "recipient": {"id": recipient},
+                              "message": {"text": payload}
+                          }),
+                          headers={'Content-type': 'application/json'})
+
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": token},
+                          data=json.dumps({
+                              "recipient": {"id": recipient},
+                              "message": {"text": payload_text,
+                                          "quick_replies": quick_replies_list}
+                          }),
+                          headers={'Content-type': 'application/json'})
+
+    else:
+        payload = "http://imgur.com/WeyNGtQ.jpg"
+        for submission in reddit.subreddit(subreddit_name).hot(limit=None):
+            if (submission.link_flair_css_class == 'image') or (
+                        (submission.is_self != True) and ((".jpg" in submission.url) or (".png" in submission.url))):
+                query_result = Posts.query.filter(Posts.name == submission.id).first()
+                if query_result is None:
+                    post = Posts(submission.id, submission.url)
+                    user.posts.append(post)
+                    db.session.commit()
+                    payload = submission.url
+                    break
+                elif user not in query_result.users:
+                    user.posts.append(query_result)
+                    db.session.commit()
+                    payload = submission.url
+                    break
+                else:
+                    continue
+
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": token},
+                          data=json.dumps({
+                              "recipient": {"id": recipient},
+                              "message": {"attachment": {
+                                  "type": "image",
+                                  "payload": {
+                                      "url": payload
+                                  }},
+                                  "quick_replies": quick_replies_list}
+                          }),
+                          headers={'Content-type': 'application/json'})
+
     if r.status_code != requests.codes.ok:
         click.echo(click.style(r.text, fg="green", bold=True, bg="black"))
 
+
+def get_or_create(session, model, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        instance = model(**kwargs)
+        session.add(instance)
+        session.commit()
+        return instance

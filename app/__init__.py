@@ -6,8 +6,12 @@ import jinja2
 from config import config, Config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import praw
 
 db = SQLAlchemy()
+reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
+                     client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+
 
 class RedditBotApp(Flask):
     """
