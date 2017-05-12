@@ -1,32 +1,35 @@
 from . import home
-from flask import  request
+from flask import request
 import json
 import requests
-
+import click
 
 # This needs to be filled with the Page Access Token that will be provided
 # by the Facebook App that will be created.
 PAT = ''
 
+
 @home.route('', methods=['GET'])
 def handle_verification():
-    print "Handling Verification."
+    click.echo(click.style("Handling Verification.", fg="green", bold=True, bg="black"))
     if request.args.get('hub.verify_token', '') == 'my_voice_is_my_password_verify_me':
-        print "Verification successful!"
+        click.echo(click.style("Verification successful!", fg="green", bold=True, bg="black"))
         return request.args.get('hub.challenge', '')
     else:
-        print "Verification failed!"
+        click.echo(click.style("Verification failed!", fg="green", bold=True, bg="black"))
         return 'Error, wrong validation token'
 
-@app.route('/', methods=['POST'])
+
+@home.route('', methods=['POST'])
 def handle_messages():
-    print "Handling Messages"
+    click.echo(click.style("Handling Messages", fg="green", bold=True, bg="black"))
     payload = request.get_data()
-    print payload
+    click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True, bg="black"))
     for sender, message in messaging_events(payload):
-        print "Incoming from %s: %s" % (sender, message)
+        click.echo(click.style("Incoming from %s: %s" % (sender, message), fg="green", bold=True, bg="black"))
         send_message(PAT, sender, message)
     return "ok"
+
 
 def messaging_events(payload):
     """Generate tuples of (sender_id, message_text) from the
@@ -46,14 +49,12 @@ def send_message(token, recipient, text):
     """
 
     r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-        params={"access_token": token},
-        data=json.dumps({
-            "recipient": {"id": recipient},
-            "message": {"text": text.decode('unicode_escape')}
-        }),
-        headers={'Content-type': 'application/json'})
+                      params={"access_token": token},
+                      data=json.dumps({
+                          "recipient": {"id": recipient},
+                          "message": {"text": text.decode('unicode_escape')}
+                      }),
+                      headers={'Content-type': 'application/json'})
     if r.status_code != requests.codes.ok:
-        print r.text
+        click.echo(click.style(r.text, fg="green", bold=True, bg="black"))
 
-if __name__ == '__main__':
-    app.run()

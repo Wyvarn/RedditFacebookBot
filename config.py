@@ -47,6 +47,10 @@ class Config(object):
     REDDIT_REDIRECT_URI = os.environ.get("REDDIT_REDIRECT_URI")
     REDDIT_CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID")
 
+    # OAUTH CONFIGS from facebook
+    FACEBOOK_PAGE_ACCESS_TOKEN = os.environ.get("FACEBOOK_PAGE_ACCESS_TOKEN")
+    FACEBOOK_WEBHOOK_VERIFY_TOKEN = os.environ.get("FACEBOOK_WEBHOOK_VERIFY_TOKEN")
+
     ROOT_DIR = APP_ROOT
     WTF_CSRF_ENABLED = True
     CSRF_ENABLED = True
