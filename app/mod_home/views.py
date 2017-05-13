@@ -58,6 +58,7 @@ def messaging_events(payload):
     """
     data = json.loads(payload)
     message_events = data["entry"][0]["messaging"]
+    click.echo(click.style(text="Message Events: " + str(message_events), fg="yellow", bold=True))
     for event in message_events:
         if "message" in event and "text" in event["message"]:
             yield event["sender"]["id"], event["message"]["text"].encode('unicode_escape')
