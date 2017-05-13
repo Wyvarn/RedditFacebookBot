@@ -11,4 +11,4 @@ PAT = ''
 
 @home.route('', methods=['GET'])
 def handle_verification():
-    return "Hello world"
+    return "1398359162"
