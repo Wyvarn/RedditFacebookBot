@@ -14,7 +14,11 @@ You will need a couple of things for setting up
     From there, you will need to add a product to the newly created application [here](https://developers.facebook.com/apps/)
     
     You will then need to create a token and save the `PAGE ACCESS TOKEN` you will receive from Facebook
+
+2. Heroku Account
     
+   This will be used to deploy the application. A handy tool to have is the [heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) 
+
 ### Setup
 
 Setting up is really simple and requires a simple cloning of the repo and installing dependencies
@@ -40,4 +44,5 @@ export REDDIT_CLIENT_KEY=<YOUR_CLIENT_KEY> >> .env
 # such as DATABASE_URL,
 ```
 
-For a detailed description check [here](https://pythontips.com/2017/04/13/making-a-reddit-facebook-messenger-bot/?utm_source=mybridge&utm_medium=blog&utm_campaign=read_more)
+For a detailed description check 
+[here](https://pythontips.com/2017/04/13/making-a-reddit-facebook-messenger-bot/?utm_source=mybridge&utm_medium=blog&utm_campaign=read_more) and [here](https://tsaprailis.com/2016/06/02/How-to-build-and-deploy-a-Facebook-Messenger-bot-with-Python-and-Flask-a-tutorial/)

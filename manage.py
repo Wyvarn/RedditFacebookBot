@@ -2,31 +2,30 @@ import os
 import better_exceptions
 from flask_script import Manager, Shell, Server
 from setup_environment import setup_environment_variables
-from app import create_app
+from app import create_app, db
+from flask_migrate import MigrateCommand, Migrate, upgrade
+import alembic
+import alembic.config
 
 # import environment variables
 setup_environment_variables()
 
 # create the application with given configuration from environment
-app = create_app(os.getenv("FLASK_CONFIG") or "default")
-
-
-def make_shell_context():
-    """
-    Makes a shell context
-    :return dictionary object 
-    :rtype: dict
-    """
-    return dict(app=app, db=db)
-
+app = create_app(os.environ.get("FLASK_CONFIG") or "default")
 
 manager = Manager(app)
+migrate = Migrate(app, db)
 server = Server(host="127.0.0.1", port=5000)
 public_server = Server(host="0.0.0.0", port=5000)
 
-manager.add_command("shell", Shell(make_context=make_shell_context))
+
+def make_shell_context():
+    return dict(app=app, db=db)
+
+manager.add_command('shell', Shell(make_context=make_shell_context))
+manager.add_command('db', MigrateCommand)
 manager.add_command("runserver", server)
-manager.add_command("publicserver", public_server)
+
 
 cov = None
 if os.environ.get('FLASK_COVERAGE'):
@@ -80,6 +79,26 @@ def profile(length=25, profile_dir=None):
     app.config["PROFILE"] = True
     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length], profile_dir=profile_dir)
     app.run()
+
+
+@manager.option('-m', '--migration', help='create database from migrations',
+                action='store_true', default=None)
+def init_db(migration):
+    """drop all databases, instantiate schemas"""
+    db.drop_all()
+
+    if migration:
+        # create database using migrations
+        print("applying migrations")
+        upgrade()
+    else:
+        # create database from model schema directly
+        db.create_all()
+        db.session.commit()
+        cfg = alembic.config.Config("app/migrations/alembic.ini")
+        alembic.command.stamp(cfg, "head")
+        # todo: add default roles
+        # Role.add_default_roles()
 
 
 if __name__ == "__main__":
