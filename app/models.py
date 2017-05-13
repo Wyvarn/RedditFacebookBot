@@ -52,7 +52,8 @@ class Users(Base):
         self.name = name
 
     def __repr__(self):
-        pass
+        return "id: {}, name:{}, Dates: [Created: {}, Modified: {}]".format(
+            self.id, self.name, self.date_created, self.date_modified, self.posts)
 
 
 class Posts(Base):
@@ -70,4 +71,6 @@ class Posts(Base):
         self.url = url
 
     def __repr__(self):
-        pass
+        return "Id: {}, Name:{}, url:{}, Dates: [Created: {}, Modified: {}]".format(
+            self.id, self.name, self.url, self.date_created, self.date_modified
+        )

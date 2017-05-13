@@ -68,6 +68,12 @@ def messaging_events(payload):
 def send_message(token, recipient, text):
     """
     Send the message text to recipient with id recipient.
+    
+    payload = "http://imgur.com/WeyNGtQ.jpg"
+    
+    It makes sure that if no new posts are found for a particular user 
+    (every subreddit has a maximum number of “hot” posts) we have at least something to return.
+     Otherwise we will get a variable undeclared error.
     """
     quick_replies_list = Config.QUICK_REPLIES_LIST
 
@@ -134,14 +140,6 @@ def send_message(token, recipient, text):
                           params={"access_token": token},
                           data=json.dumps({
                               "recipient": {"id": recipient},
-                              "message": {"text": payload}
-                          }),
-                          headers={'Content-type': 'application/json'})
-
-        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                          params={"access_token": token},
-                          data=json.dumps({
-                              "recipient": {"id": recipient},
                               "message": {"text": payload_text,
                                           "quick_replies": quick_replies_list}
                           }),
@@ -185,6 +183,15 @@ def send_message(token, recipient, text):
 
 
 def get_or_create(session, model, **kwargs):
+    """
+    checks whether a user with the particular name exists or not. 
+    If it exists it selects that user from the db and returns it. In case it doesn’t exist
+     (user), it creates it and then returns that newly created user:
+    :param session: 
+    :param model: 
+    :param kwargs: 
+    :return: 
+    """
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance

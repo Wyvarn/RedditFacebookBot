@@ -14,7 +14,7 @@ setup_environment_variables()
 app = create_app(os.environ.get("FLASK_CONFIG") or "default")
 
 manager = Manager(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, directory="")
 server = Server(host="127.0.0.1", port=5000)
 public_server = Server(host="0.0.0.0", port=5000)
 
