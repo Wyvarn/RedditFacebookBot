@@ -5,7 +5,7 @@ import requests
 import click
 from app import db  # , reddit
 from config import Config
-from app.models import Users, Posts
+from app.models import User, Posts
 import os
 import praw
 
@@ -86,7 +86,7 @@ def send_message(token, recipient, text):
     else:
         subreddit_name = "GetMotivated"
 
-    user = get_or_create(db.session, Users, name=recipient)
+    user = get_or_create(db.session, User, name=recipient)
 
     if subreddit_name == "Showerthoughts":
         for submission in reddit.subreddit(subreddit_name).hot(limit=None):

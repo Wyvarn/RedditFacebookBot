@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod
 
 relationship_table = Table('relationship_table',
                            db.metadata,
-                           Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+                           Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
                            Column('post_id', Integer, ForeignKey('posts.id'), nullable=False),
                            PrimaryKeyConstraint('user_id', 'post_id'))
 
@@ -38,12 +38,12 @@ class Base(db.Model):
         pass
 
 
-class Users(Base):
+class User(Base):
     """
     User table
     """
 
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     name = Column(String(255), nullable=False)
     posts = relationship('Posts', secondary=relationship_table, backref='users')
