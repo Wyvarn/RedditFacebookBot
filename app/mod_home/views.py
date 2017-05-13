@@ -77,11 +77,11 @@ def send_message(token, recipient, text):
     """
     quick_replies_list = Config.QUICK_REPLIES_LIST
 
-    if "meme" in text.lower():
+    if b"meme" in text.lower():
         subreddit_name = "memes"
-    elif "shower" in text.lower():
+    elif b"shower" in text.lower():
         subreddit_name = "Showerthoughts"
-    elif "joke" in text.lower():
+    elif b"joke" in text.lower():
         subreddit_name = "Jokes"
     else:
         subreddit_name = "GetMotivated"
