@@ -7,18 +7,14 @@ The Posts table has name and url field. "name" will be populated by the reddit s
 and the url will be populated by the url of that post. 
 """
 
-from app import db
-from sqlalchemy import Column, String, Integer, DateTime, func, ForeignKey, Boolean, Table,\
+from . import db
+from sqlalchemy import Column, String, Integer, DateTime, func, ForeignKey, Table, \
     PrimaryKeyConstraint
-from sqlalchemy.orm import relationship, backref, dynamic
+from sqlalchemy.orm import relationship
 from abc import ABCMeta, abstractmethod
-from hashlib import md5
-import uuid
-from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.ext.declarative import declared_attr
-from datetime import datetime
 
 relationship_table = Table('relationship_table',
+                           db.metadata,
                            Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
                            Column('post_id', Integer, ForeignKey('posts.id'), nullable=False),
                            PrimaryKeyConstraint('user_id', 'post_id'))
@@ -46,6 +42,7 @@ class Users(Base):
     """
     User table
     """
+
     __tablename__ = "users"
 
     name = Column(String(255), nullable=False)
@@ -54,16 +51,23 @@ class Users(Base):
     def __init__(self, name):
         self.name = name
 
+    def __repr__(self):
+        pass
+
 
 class Posts(Base):
     """
     Posts sent to users
     """
+
     __tablename__ = "posts"
 
     name = Column(String, unique=True, nullable=False)
     url = Column(String, nullable=False)
 
-    def __init__(self, name, url):
+    def __init__(self, name=None, url=None):
         self.name = name
         self.url = url
+
+    def __repr__(self):
+        pass

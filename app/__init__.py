@@ -9,8 +9,9 @@ from flask_sqlalchemy import SQLAlchemy
 import praw
 
 db = SQLAlchemy()
-reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
-                     client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+# reddit = praw.Reddit(site_name="bot1", client_id=Config.REDDIT_CLIENT_ID,
+#                      client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+reddit = praw.Reddit(site_name="bot1")
 
 
 class RedditBotApp(Flask):
@@ -59,9 +60,6 @@ def create_app(config_name):
     app = RedditBotApp()
 
     db.init_app(app)
-
-    # configure the application with the given configuration name, testing, development,
-    # production
 
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)

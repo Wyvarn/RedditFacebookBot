@@ -3,14 +3,14 @@ from flask import request, current_app
 import json
 import requests
 import click
-from app import db
+from app import db, reddit
 from config import Config
 from app.models import Users, Posts
 import os
 import praw
 
-reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
-                     client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+# reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
+#                      client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
 
 
 # TODO: move to auth module
@@ -20,13 +20,14 @@ def handle_verification():
     Handles verification of this request
     :return: request from Facebook if valid, Error message
     """
-    click.echo(click.style("Handling Verification.", fg="green", bold=True, bg="black"))
+    click.echo(click.style("Handling Verification.", fg="green", bold=True))
     facebook_webhook_token = current_app.config.get("FACEBOOK_WEBHOOK_VERIFY_TOKEN")
+    print(facebook_webhook_token)
     if request.args.get('hub.verify_token', '') == facebook_webhook_token:
-        click.echo(click.style("Verification successful!", fg="green", bold=True, bg="black"))
+        click.echo(click.style("Verification successful!", fg="green", bold=True))
         return request.args.get('hub.challenge', '')
     else:
-        click.echo(click.style("Verification failed!", fg="red", bold=True, bg="black"))
+        click.echo(click.style("Verification failed!", fg="red", bold=True))
         return 'Error, wrong validation token'
 
 
@@ -35,16 +36,16 @@ def handle_messages():
     # retrieve PAGE ACCESS TOKEN from facebook
     page_access_token = current_app.config.get("FACEBOOK_PAGE_ACCESS_TOKEN")
 
-    click.echo(click.style("Handling Messages", fg="green", bold=True, bg="black"))
+    click.echo(click.style("Handling Messages", fg="green", bold=True))
 
     # get the payload
     payload = request.get_data()
 
-    click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True, bg="black"))
+    click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True))
 
     # for each sender and message
     for sender, message in messaging_events(payload):
-        click.echo(click.style("Incoming from %s: %s" % (sender, message), fg="green", bold=True, bg="black"))
+        click.echo(click.style("Incoming from %s: %s" % (sender, message), fg="green", bold=True))
         # send them a message
         send_message(page_access_token, sender, message)
     return "ok"
@@ -179,7 +180,7 @@ def send_message(token, recipient, text):
                           headers={'Content-type': 'application/json'})
 
     if r.status_code != requests.codes.ok:
-        click.echo(click.style(r.text, fg="green", bold=True, bg="black"))
+        click.echo(click.style(r.text, fg="green", bold=True))
 
 
 def get_or_create(session, model, **kwargs):

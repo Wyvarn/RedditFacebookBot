@@ -11,34 +11,21 @@ import alembic.config
 setup_environment_variables()
 
 # create the application with given configuration from environment
-app = create_app(os.getenv("FLASK_CONFIG") or "default")
-# import models with app context
-# this prevents the data from the db from being deleted on every migration
-
-with app.app_context():
-    from app.models import *
+app = create_app(os.environ.get("FLASK_CONFIG") or "default")
 
 manager = Manager(app)
 migrate = Migrate(app, db)
-manager.add_command('db', MigrateCommand)
-
-
-def make_shell_context():
-    """
-    Makes a shell context
-    :return dictionary object 
-    :rtype: dict
-    """
-    return dict(app=app, db=db)
-
-
-manager = Manager(app)
 server = Server(host="127.0.0.1", port=5000)
 public_server = Server(host="0.0.0.0", port=5000)
 
-manager.add_command("shell", Shell(make_context=make_shell_context))
+
+def make_shell_context():
+    return dict(app=app, db=db)
+
+manager.add_command('shell', Shell(make_context=make_shell_context))
+manager.add_command('db', MigrateCommand)
 manager.add_command("runserver", server)
-manager.add_command("publicserver", public_server)
+
 
 cov = None
 if os.environ.get('FLASK_COVERAGE'):
