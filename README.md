@@ -62,8 +62,8 @@ Check [praw.copy.ini](praw.copy.ini) file for a bit more information and also [h
 ##### Screenshots
 ____
 
-![](screenshots/Screenshot_20170513-150901.png)
-![](screenshots/Screenshot_20170513-150924.png)
+![Facebook bot](screenshots/Screenshot_20170513-150901.png)
+![Quick Replies](screenshots/Screenshot_20170513-150924.png)
 ____
 
 
