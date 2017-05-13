@@ -124,6 +124,7 @@ class ProductionConfig(Config):
     """
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     ADMINS = [os.environ.get("ADMIN_EMAIL_1")]
+    DEBUG = False
 
     @classmethod
     def init_app(cls, app):
