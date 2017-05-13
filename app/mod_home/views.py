@@ -40,7 +40,7 @@ def handle_messages():
     click.echo(click.style("Handling Messages", fg="green", bold=True))
 
     # get the payload
-    payload = request.get_data()
+    payload = request.get_data(as_text=True)
 
     click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True))
 
@@ -56,7 +56,7 @@ def messaging_events(payload):
     """Generate tuples of (sender_id, message_text) from the
     provided payload.
     """
-    data = json.loads(str(payload))
+    data = json.loads(payload)
     message_events = data["entry"][0]["messaging"]
     for event in message_events:
         if "message" in event and "text" in event["message"]:
