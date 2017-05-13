@@ -10,7 +10,7 @@ import os
 import praw
 
 
-reddit = praw.Reddit(site_name="bot1", client_id=os.environ.get("REDDIT_CLIENT_ID"),
+reddit = praw.Reddit(client_id=os.environ.get("REDDIT_CLIENT_ID"),
                      client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
                      user_agent=os.environ.get("USER_AGENT"))
 
