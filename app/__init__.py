@@ -3,11 +3,9 @@
 This defines the application module that essentially creates a new flask app object
 """
 import jinja2
-from config import config, Config
+from config import config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import praw
-import os
 
 db = SQLAlchemy()
 

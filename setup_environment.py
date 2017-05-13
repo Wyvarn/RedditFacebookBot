@@ -1,4 +1,5 @@
 import os
+from click import echo, style
 
 
 def setup_environment_variables():
@@ -7,7 +8,7 @@ def setup_environment_variables():
     :return: 
     """
     if os.path.exists(".env"):
-        print("Importing environment variables")
+        echo(style(text=">>>> Importing environment variables from .env", fg="green", bold=True))
         for line in open(".env"):
             var = line.strip().split("=")
             if len(var) == 2:
