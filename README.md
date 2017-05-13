@@ -59,5 +59,16 @@ Another setup that may be needed is a `praw.ini` file. Although not necessary it
 Check [praw.copy.ini](praw.copy.ini) file for a bit more information and also [here](https://praw.readthedocs.io/en/latest/index.html) for a complete reference when interacting with Reddit API
 
 
+##### Screenshots
+____
+
+![](screenshots/Screenshot_20170513-150901.png)
+![](screenshots/Screenshot_20170513-150924.png)
+____
+
+
 For a detailed description check 
 [here](https://pythontips.com/2017/04/13/making-a-reddit-facebook-messenger-bot/?utm_source=mybridge&utm_medium=blog&utm_campaign=read_more) and [here](https://tsaprailis.com/2016/06/02/How-to-build-and-deploy-a-Facebook-Messenger-bot-with-Python-and-Flask-a-tutorial/)
+
+Bots everywhere!
+Enjoy! :D
