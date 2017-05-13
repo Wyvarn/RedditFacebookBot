@@ -47,7 +47,7 @@ def handle_messages():
     for sender, message in messaging_events(payload):
         click.echo(click.style(">>>> Incoming from %s: %s" % (sender, message), fg="green", bold=True))
         # send them a message
-        send_message(page_access_token, sender, message)
+        send_message(page_access_token, sender, str(message))
     return "ok"
 
 
