@@ -9,7 +9,6 @@ from app.models import User, Posts
 import os
 import praw
 
-
 reddit = praw.Reddit(client_id=os.environ.get("REDDIT_CLIENT_ID"),
                      client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
                      user_agent=os.environ.get("USER_AGENT"))
@@ -37,18 +36,18 @@ def handle_messages():
     # retrieve PAGE ACCESS TOKEN from facebook
     page_access_token = current_app.config.get("FACEBOOK_PAGE_ACCESS_TOKEN")
 
-    click.echo(click.style("Handling Messages", fg="green", bold=True))
+    click.echo(click.style(">>>> Handling Messages", fg="green", bold=True))
 
     # get the payload
     payload = request.get_data(as_text=True)
 
-    click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True))
+    click.echo(click.style(">>>> Payload: {}".format(payload), fg="green", bold=True))
 
     # for each sender and message
     for sender, message in messaging_events(payload):
-        click.echo(click.style("Incoming from %s: %s" % (sender, message), fg="green", bold=True))
+        click.echo(click.style(">>>> Incoming from %s: %s" % (sender, message), fg="green", bold=True))
         # send them a message
-        send_message(page_access_token, sender, message)
+        send_message(page_access_token, sender, str(message))
     return "ok"
 
 
@@ -58,7 +57,7 @@ def messaging_events(payload):
     """
     data = json.loads(payload)
     message_events = data["entry"][0]["messaging"]
-    click.echo(click.style(text="Message Events: " + str(message_events), fg="yellow", bold=True))
+    click.echo(click.style(text=">>>> Message Events: " + str(message_events), fg="yellow", bold=True))
     for event in message_events:
         if "message" in event and "text" in event["message"]:
             yield event["sender"]["id"], event["message"]["text"].encode('unicode_escape')
@@ -78,11 +77,11 @@ def send_message(token, recipient, text):
     """
     quick_replies_list = Config.QUICK_REPLIES_LIST
 
-    if b"meme" in text.lower():
+    if "meme" in text.lower():
         subreddit_name = "memes"
-    elif b"shower" in text.lower():
+    elif "shower" in text.lower():
         subreddit_name = "Showerthoughts"
-    elif b"joke" in text.lower():
+    elif "joke" in text.lower():
         subreddit_name = "Jokes"
     else:
         subreddit_name = "GetMotivated"
@@ -150,7 +149,7 @@ def send_message(token, recipient, text):
         payload = "http://imgur.com/WeyNGtQ.jpg"
         for submission in reddit.subreddit(subreddit_name).hot(limit=None):
             if (submission.link_flair_css_class == 'image') or (
-                        (submission.is_self != True) and ((".jpg" in submission.url) or (".png" in submission.url))):
+                        (submission.is_self is not True) and ((".jpg" in submission.url) or (".png" in submission.url))):
                 query_result = Posts.query.filter(Posts.name == submission.id).first()
                 if query_result is None:
                     post = Posts(submission.id, submission.url)
