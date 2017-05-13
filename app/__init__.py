@@ -3,15 +3,11 @@
 This defines the application module that essentially creates a new flask app object
 """
 import jinja2
-from config import config, Config
+from config import config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import praw
 
 db = SQLAlchemy()
-# reddit = praw.Reddit(site_name="bot1", client_id=Config.REDDIT_CLIENT_ID,
-#                      client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
-reddit = praw.Reddit(site_name="bot1")
 
 
 class RedditBotApp(Flask):
@@ -57,6 +53,7 @@ def create_app(config_name):
     :return: a new WSGI Flask app
     :rtype: Flask
     """
+    # app = Flask(__name__)
     app = RedditBotApp()
 
     db.init_app(app)

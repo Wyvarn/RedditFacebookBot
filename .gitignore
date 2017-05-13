@@ -1,9 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### VirtualEnv template
 .idea/
-praw.ini
 migrations
+praw.ini
 envvar.sh
+
 # Virtualenv
 # http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
 .Python
@@ -70,7 +71,6 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-.Python
 env/
 build/
 develop-eggs/
@@ -146,7 +146,6 @@ celerybeat-schedule
 .env
 
 # virtualenv
-.venv
 venv/
 ENV/
 

@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod
 
 relationship_table = Table('relationship_table',
                            db.metadata,
-                           Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+                           Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
                            Column('post_id', Integer, ForeignKey('posts.id'), nullable=False),
                            PrimaryKeyConstraint('user_id', 'post_id'))
 
@@ -38,12 +38,12 @@ class Base(db.Model):
         pass
 
 
-class Users(Base):
+class User(Base):
     """
     User table
     """
 
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     name = Column(String(255), nullable=False)
     posts = relationship('Posts', secondary=relationship_table, backref='users')
@@ -52,7 +52,8 @@ class Users(Base):
         self.name = name
 
     def __repr__(self):
-        pass
+        return "id: {}, name:{}, Dates: [Created: {}, Modified: {}]".format(
+            self.id, self.name, self.date_created, self.date_modified, self.posts)
 
 
 class Posts(Base):
@@ -70,4 +71,6 @@ class Posts(Base):
         self.url = url
 
     def __repr__(self):
-        pass
+        return "Id: {}, Name:{}, url:{}, Dates: [Created: {}, Modified: {}]".format(
+            self.id, self.name, self.url, self.date_created, self.date_modified
+        )

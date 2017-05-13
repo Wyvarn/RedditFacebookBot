@@ -3,14 +3,16 @@ from flask import request, current_app
 import json
 import requests
 import click
-from app import db, reddit
+from app import db  # , reddit
 from config import Config
-from app.models import Users, Posts
+from app.models import User, Posts
 import os
 import praw
 
-# reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
-#                      client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+
+reddit = praw.Reddit(client_id=os.environ.get("REDDIT_CLIENT_ID"),
+                     client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
+                     user_agent=os.environ.get("USER_AGENT"))
 
 
 # TODO: move to auth module
@@ -22,7 +24,6 @@ def handle_verification():
     """
     click.echo(click.style("Handling Verification.", fg="green", bold=True))
     facebook_webhook_token = current_app.config.get("FACEBOOK_WEBHOOK_VERIFY_TOKEN")
-    print(facebook_webhook_token)
     if request.args.get('hub.verify_token', '') == facebook_webhook_token:
         click.echo(click.style("Verification successful!", fg="green", bold=True))
         return request.args.get('hub.challenge', '')
@@ -39,7 +40,7 @@ def handle_messages():
     click.echo(click.style("Handling Messages", fg="green", bold=True))
 
     # get the payload
-    payload = request.get_data()
+    payload = request.get_data(as_text=True)
 
     click.echo(click.style("Payload: {}".format(payload), fg="green", bold=True))
 
@@ -67,19 +68,25 @@ def messaging_events(payload):
 def send_message(token, recipient, text):
     """
     Send the message text to recipient with id recipient.
+    
+    payload = "http://imgur.com/WeyNGtQ.jpg"
+    
+    It makes sure that if no new posts are found for a particular user 
+    (every subreddit has a maximum number of “hot” posts) we have at least something to return.
+     Otherwise we will get a variable undeclared error.
     """
     quick_replies_list = Config.QUICK_REPLIES_LIST
 
-    if "meme" in text.lower():
+    if b"meme" in text.lower():
         subreddit_name = "memes"
-    elif "shower" in text.lower():
+    elif b"shower" in text.lower():
         subreddit_name = "Showerthoughts"
-    elif "joke" in text.lower():
+    elif b"joke" in text.lower():
         subreddit_name = "Jokes"
     else:
         subreddit_name = "GetMotivated"
 
-    user = get_or_create(db.session, Users, name=recipient)
+    user = get_or_create(db.session, User, name=recipient)
 
     if subreddit_name == "Showerthoughts":
         for submission in reddit.subreddit(subreddit_name).hot(limit=None):
@@ -133,14 +140,6 @@ def send_message(token, recipient, text):
                           params={"access_token": token},
                           data=json.dumps({
                               "recipient": {"id": recipient},
-                              "message": {"text": payload}
-                          }),
-                          headers={'Content-type': 'application/json'})
-
-        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                          params={"access_token": token},
-                          data=json.dumps({
-                              "recipient": {"id": recipient},
                               "message": {"text": payload_text,
                                           "quick_replies": quick_replies_list}
                           }),
@@ -184,6 +183,15 @@ def send_message(token, recipient, text):
 
 
 def get_or_create(session, model, **kwargs):
+    """
+    checks whether a user with the particular name exists or not. 
+    If it exists it selects that user from the db and returns it. In case it doesn’t exist
+     (user), it creates it and then returns that newly created user:
+    :param session: 
+    :param model: 
+    :param kwargs: 
+    :return: 
+    """
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance

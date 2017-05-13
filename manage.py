@@ -6,6 +6,14 @@ from app import create_app, db
 from flask_migrate import MigrateCommand, Migrate, upgrade
 import alembic
 import alembic.config
+from app.models import User, Posts
+
+cov = None
+if os.environ.get('FLASK_COVERAGE'):
+    import coverage
+
+    cov = coverage.coverage(branch=True, include='app/*')
+    cov.start()
 
 # import environment variables
 setup_environment_variables()
@@ -14,25 +22,17 @@ setup_environment_variables()
 app = create_app(os.environ.get("FLASK_CONFIG") or "default")
 
 manager = Manager(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, directory="migrations")
 server = Server(host="127.0.0.1", port=5000)
 public_server = Server(host="0.0.0.0", port=5000)
 
 
 def make_shell_context():
-    return dict(app=app, db=db)
+    return dict(app=app, db=db, User=User, Posts=Posts)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 manager.add_command("runserver", server)
-
-
-cov = None
-if os.environ.get('FLASK_COVERAGE'):
-    import coverage
-
-    cov = coverage.coverage(branch=True, include='app/*')
-    cov.start()
 
 
 @manager.command
