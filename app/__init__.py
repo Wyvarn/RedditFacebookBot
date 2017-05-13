@@ -53,6 +53,7 @@ def create_app(config_name):
     :return: a new WSGI Flask app
     :rtype: Flask
     """
+    # app = Flask(__name__)
     app = RedditBotApp()
 
     db.init_app(app)

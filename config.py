@@ -32,7 +32,6 @@ class Config(object):
     # DATABASE CONFIGS
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     POSTGRES_USER = os.environ.get("POSTGRES_USER")
     POSTGRES_DB = os.environ.get("POSTGRES_DB")
