@@ -56,7 +56,7 @@ def messaging_events(payload):
     """Generate tuples of (sender_id, message_text) from the
     provided payload.
     """
-    data = json.loads(payload)
+    data = json.loads(str(payload))
     message_events = data["entry"][0]["messaging"]
     for event in message_events:
         if "message" in event and "text" in event["message"]:
