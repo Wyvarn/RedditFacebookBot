@@ -3,14 +3,16 @@ from flask import request, current_app
 import json
 import requests
 import click
-from app import db, reddit
+from app import db  # , reddit
 from config import Config
 from app.models import Users, Posts
 import os
 import praw
 
-# reddit = praw.Reddit(client_id=Config.REDDIT_CLIENT_ID,
-#                      client_secret=Config.REDDIT_CLIENT_SECRET, user_agent=Config.USER_AGENT)
+
+reddit = praw.Reddit(site_name="bot1", client_id=os.environ.get("REDDIT_CLIENT_ID"),
+                     client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
+                     user_agent=os.environ.get("USER_AGENT"))
 
 
 # TODO: move to auth module
@@ -22,7 +24,6 @@ def handle_verification():
     """
     click.echo(click.style("Handling Verification.", fg="green", bold=True))
     facebook_webhook_token = current_app.config.get("FACEBOOK_WEBHOOK_VERIFY_TOKEN")
-    print(facebook_webhook_token)
     if request.args.get('hub.verify_token', '') == facebook_webhook_token:
         click.echo(click.style("Verification successful!", fg="green", bold=True))
         return request.args.get('hub.challenge', '')
