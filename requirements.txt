@@ -20,7 +20,7 @@ py==1.4.33
 pyparsing==2.2.0
 pytest==3.0.7
 python-editor==1.0.3
-requests==2.14.2
+requests==2.20.0
 six==1.10.0
 SQLAlchemy==1.1.9
 update-checker==0.16
